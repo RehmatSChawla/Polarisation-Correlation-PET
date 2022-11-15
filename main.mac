@@ -1,0 +1,193 @@
+# Geometry
+# Material Database
+/gate/geometry/setMaterialDatabase GateMaterials.db
+
+# World
+/gate/world/geometry/setXLength 50 cm
+# x is the direction of the phantom's orientation
+# The detector is in the y-z plane
+/gate/world/geometry/setYLength 50 cm
+/gate/world/geometry/setZLength 50 cm
+/gate/world/setMaterial Air
+# /gate/world/vis/forceWireframe
+
+# Cylindrical Scanner
+/gate/world/daughters/name cylindricalPET
+/gate/world/daughters/insert cylinder
+/gate/cylindricalPET/geometry/setRmax 40 cm
+/gate/cylindricalPET/geometry/setRmin 30 cm
+/gate/cylindricalPET/geometry/setHeight 10 cm
+/gate/cylindricalPET/setMaterial Water
+# /gate/cylindricalPET/vis/setColor blue
+# /gate/cylindricalPET/vis/forceWireframe
+
+# Head
+/gate/cylindricalPET/daughters/name PET_unit
+/gate/cylindricalPET/daughters/insert box
+/gate/PET_unit/placement/setTranslation 35.0 0.0 0.0 cm
+/gate/PET_unit/geometry/setXLength 10 cm
+/gate/PET_unit/geometry/setYLength 10 cm
+/gate/PET_unit/geometry/setZLength 14 cm
+/gate/PET_unit/setMaterial Water
+# /gate/PET_unit/vis/setColor yellow
+# /gate/PET_unit/vis/forceWireframe
+
+# Crystal
+/gate/PET_unit/daughters/name Crystal_unit
+/gate/PET_unit/daughters/insert box
+/gate/Crystal_unit/placement/setTranslation 0.0 0.0 0.0 cm
+/gate/Crystal_unit/geometry/setXLength 1 cm
+/gate/Crystal_unit/geometry/setYLength 8 cm
+/gate/Crystal_unit/geometry/setZLength 1 cm
+/gate/Crystal_unit/setMaterial LSO
+# /gate/Crystal_unit/vis/setColor red
+# /gate/Crystal_unit/vis/forceWireframe
+
+# Repeat Crystal
+/gate/Crystal_unit/repeaters/insert cubicArray
+/gate/Crystal_unit/cubicArray/setRepeatNumberX 9
+/gate/Crystal_unit/cubicArray/setRepeatNumberY 1
+/gate/Crystal_unit/cubicArray/setRepeatNumberZ 13
+/gate/Crystal_unit/cubicArray/setRepeatVector 1 0 1 cm
+
+# Repeat block
+/gate/PET_unit/repeaters/insert ring
+/gate/PET_unit/ring/setRepeatNumber 16
+
+# Attach volumes
+/gate/systems/cylindricalPET/rsector/attach PET_unit
+/gate/systems/cylindricalPET/module/attach Crystal_unit
+
+# Sensitive detector
+/gate/Crystal_unit/attachCrystalSD vglue 1 cm
+
+# Phantom
+/gate/world/daughters/name body_phantom
+/gate/world/daughters/insert cylinder
+/gate/body_phantom/geometry/setRmax 1 cm
+/gate/body_phantom/geometry/setHeight 50 mm
+/gate/body_phantom/setMaterial Water
+# /gate/body_phantom/vis/setColor grey
+
+# Sensitive phantom
+/gate/body_phantom/attachPhantomSD
+
+# Physics
+/gate/physics/addPhysicsList emstandard_opt3
+
+/gate/physics/Gamma/SetCutInRegion      world 1 m
+/gate/physics/Electron/SetCutInRegion   world 1 m
+/gate/physics/Positron/SetCutInRegion   world 1 m
+
+/gate/physics/Gamma/SetCutInRegion      Crystal_unit 1 mm
+/gate/physics/Electron/SetCutInRegion   Crystal_unit 1 mm
+/gate/physics/Positron/SetCutInRegion   Crystal_unit 1 mm
+
+/gate/physics/Gamma/SetCutInRegion      body_phantom 1 mm
+/gate/physics/Electron/SetCutInRegion   body_phantom 1 mm
+/gate/physics/Positron/SetCutInRegion   body_phantom 1 mm
+
+# Initialisation
+/gate/run/initialize
+/gate/physics/displayCuts
+
+# Digitiser
+/gate/digitizer/Singles/insert adder
+/gate/digitizer/Singles/insert readout
+/gate/digitizer/Singles/readout/setDepth 1
+
+/gate/digitizer/Singles/insert                        blurring
+/gate/digitizer/Singles/blurring/setResolution        0.40
+/gate/digitizer/Singles/blurring/setEnergyOfReference 511. keV
+
+/gate/digitizer/Singles/insert                        thresholder
+/gate/digitizer/Singles/thresholder/setThreshold      300. keV
+/gate/digitizer/Singles/insert                        upholder
+/gate/digitizer/Singles/upholder/setUphold            700. keV
+
+/gate/digitizer/Coincidences/setWindow          10 ns
+/gate/digitizer/Coincidences/MultiplesPolicy    takeWinnerOfGoods
+
+# Visualisation
+# /vis/open                     OGLIQt
+# /vis/drawVolume
+# /vis/viewer/flush
+# /tracking/storeTrajectory     1
+# /vis/scene/add/trajectories
+# /vis/scene/endOfEventAction   accumulate
+
+# /vis/scene/add/axes            0 0 0 500 mm
+# /vis/scene/add/text            10 0 0 cm  20 0 0   X
+# /vis/scene/add/text            0 10 0 cm  20 0 0   Y
+# /vis/scene/add/text            0 0 10 cm  20 0 0   Z
+
+# /vis/viewer/set/auxiliaryEdge  true
+
+# Source
+/gate/source/addSource twogamma1
+/gate/source/twogamma1/setActivity 100000. becquerel
+/gate/source/twogamma1/setType backtoback
+
+/gate/source/twogamma1/gps/pos/centre 0. 0. 0. cm
+
+/gate/source/twogamma1/gps/particle gamma
+/gate/source/twogamma1/gps/ene/type Mono
+/gate/source/twogamma1/gps/ene/mono 0.511 MeV
+
+/gate/source/twogamma1/gps/pos/type Volume
+
+/gate/source/twogamma1/gps/pos/shape Cylinder
+/gate/source/twogamma1/gps/pos/radius 1 mm
+/gate/source/twogamma1/gps/pos/halfz 25 mm
+
+/gate/source/twogamma1/gps/ang/type iso
+
+/gate/source/twogamma1/gps/ang/mintheta 0. deg
+/gate/source/twogamma1/gps/ang/maxtheta 180. deg
+/gate/source/twogamma1/gps/ang/minphi 0. deg
+/gate/source/twogamma1/gps/ang/maxphi 360. deg
+
+/gate/source/addSource twogamma2
+/gate/source/twogamma2/setActivity 100000. becquerel
+/gate/source/twogamma2/setType backtoback
+
+/gate/source/twogamma2/gps/pos/centre 10. 0. 0. mm
+
+/gate/source/twogamma2/gps/particle gamma
+/gate/source/twogamma2/gps/ene/type Mono
+/gate/source/twogamma2/gps/ene/mono 0.511 MeV
+
+/gate/source/twogamma2/gps/pos/type Volume
+
+/gate/source/twogamma2/gps/pos/shape Cylinder
+/gate/source/twogamma2/gps/pos/radius 0.5 mm
+/gate/source/twogamma2/gps/pos/halfz 25 mm
+
+/gate/source/twogamma2/gps/ang/type iso
+
+/gate/source/twogamma2/gps/ang/mintheta 0. deg
+/gate/source/twogamma2/gps/ang/maxtheta 180. deg
+/gate/source/twogamma2/gps/ang/minphi 0. deg
+/gate/source/twogamma2/gps/ang/maxphi 360. deg
+/gate/source/list
+
+/gate/source/list
+
+# Output
+/gate/output/root/enable
+/gate/output/root/setFileName output/pet
+
+/gate/output/root/setRootHitFlag          1
+/gate/output/root/setRootSinglesFlag      1
+/gate/output/root/setRootCoincidencesFlag 1
+/gate/output/root/setRootNtupleFlag       0
+
+# Randomness Generator
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto
+
+# Start acquisition
+/gate/application/setTimeStart 0 s
+/gate/application/setTimeSlice 10 s
+/gate/application/setTimeStop  20 s
+/gate/application/startDAQ
