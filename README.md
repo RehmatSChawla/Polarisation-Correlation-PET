@@ -4,7 +4,7 @@ A project under Professor Pragya Das at the Indian Institute of Technology, Bomb
 
 The repository is divided into 
 - **Simulation** which is composed of GATE macros. [GATE](https://gate.uca.fr/#/admin) is a simulation software for medical imaging and radiotherapy. This code generates ROOT files as output.
-- **Simulation Results** consists of ROOT files, visuals of the simulation, and graphs obtained directly from the ROOT data.
+- **Simulation Results** consists of visuals of the simulation, and graphs obtained directly from the ROOT data.
 - **Reconstruction** aims to include MATLAB code which will reconstruct the original image from simulated data.
 
 Furthermore, a 4-month progress report is uploaded.
